@@ -5,12 +5,11 @@ import axios from "axios";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { FileUp, ImageIcon, Pencil, PlusCircle } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { FileUpload } from "@/components/file-upload"
-
+import { FileUpload } from "@/components/file-upload";
 
 import {
     Form,
@@ -23,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Course } from "@prisma/client";
+
 interface ImageFormProps {
     initialData: Course;
     courseId: string;
@@ -50,12 +50,19 @@ export const ImageForm = ({
         },
     });
 
+    useEffect(() => {
+        form.setValue("imageUrl", initialData?.imageUrl || "");
+    }, [initialData.imageUrl]);
+
     const onSubmit = async (values: z.infer<typeof formSchema>) => {
+        if (values.imageUrl === initialData.imageUrl) {
+            return; // Avoid unnecessary update
+        }
         try {
             await axios.patch(`/api/courses/${courseId}`, values);
             toast.success("Course updated");
             toggleEdit();
-            router.refresh(); // Ensure this works in your Next.js version
+            router.refresh();
         } catch (error) {
             toast.error("Something went wrong");
         }
@@ -108,10 +115,10 @@ export const ImageForm = ({
                                 onSubmit({ imageUrl: url });
                             }
                         }}
-                        />
-                        <div className="text-xs text-muted-foreground mt-4">
-                            16:9 aspect ratio recommended.
-                        </div>
+                    />
+                    <div className="text-xs text-muted-foreground mt-4">
+                        16:9 aspect ratio recommended.
+                    </div>
                 </div>
             )}
         </div>

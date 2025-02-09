@@ -2,12 +2,13 @@ import { db } from "@/lib/db";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { IconBadge } from "@/components/icon-badge";
-import { CircleDollarSign, LayoutDashboard, ListCheck, ListChecks } from "lucide-react";
+import { CircleDollarSign, LayoutDashboard, File, ListChecks } from "lucide-react";
 import { TitleForm } from "./_components/title-form";
 import { DescriptionForm } from "./_components/description-from";
 import { ImageForm } from "./_components/image-from";
 import { CategoryForm } from "./_components/category-from";
 import { PriceForm } from "./_components/price-from";
+import { AttachmentForm } from "./_components/attachment-from";
 
 export default async function CourseIdPage({ params }: { params: { courseId: string } }) {
     const { userId } = await auth();
@@ -23,6 +24,13 @@ export default async function CourseIdPage({ params }: { params: { courseId: str
         where: {
             id: params.courseId, 
         },
+        include: {
+            attachments: {
+                orderBy: {
+                    createdAt: "desc"
+                }
+            }
+        }
     });
 
     const categories = await db.category.findMany({
@@ -67,8 +75,12 @@ export default async function CourseIdPage({ params }: { params: { courseId: str
 
                     <TitleForm 
                     initialData={course} 
-                    courseId={course.id} />
-                    <DescriptionForm initialData={course} courseId={course.id} />
+                    courseId={course.id} 
+                    />
+                    <DescriptionForm 
+                    initialData={course} 
+                    courseId={course.id} 
+                    />
                     <ImageForm 
                     initialData={course} 
                     courseId={course.id} 
@@ -87,7 +99,9 @@ export default async function CourseIdPage({ params }: { params: { courseId: str
                 <div className="space-y-6">
                     <div>
                         <div className="flex items-center gap-x-2">
-                            <IconBadge icon={ListChecks} />
+                            <IconBadge 
+                            icon={ListChecks} 
+                            />
                             <h2 className="text-xl">
                                 Course chapters
                             </h2>
@@ -98,7 +112,9 @@ export default async function CourseIdPage({ params }: { params: { courseId: str
                     </div>
                     <div>
                         <div className="flex items-center gap-x-2">
-                            <IconBadge icon={CircleDollarSign} />
+                            <IconBadge 
+                            icon={CircleDollarSign} 
+                            />
                             <h2 className="text-xl">
                                 Sell your course
                             </h2>
@@ -106,6 +122,20 @@ export default async function CourseIdPage({ params }: { params: { courseId: str
                         <PriceForm 
                             initialData={course}
                             courseId={course.id}
+                        />
+                    </div>
+                    <div>
+                        <div className="flex items-center gap-x-2">
+                            <IconBadge 
+                            icon={File} 
+                            />
+                            <h2 className="text-xl">
+                                Resources & Attachments
+                            </h2>
+                        </div>
+                        <AttachmentForm
+                        initialData={course}
+                        courseId={course.id}
                         />
                     </div>
                 </div>
